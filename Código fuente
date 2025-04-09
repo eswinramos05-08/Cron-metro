@@ -1,0 +1,83 @@
+// C++ code
+//
+unsigned long tiempoInicio;   // Variable para almacenar el tiempo de inicio
+unsigned long tiempoDetenido; // Variable para almacenar el tiempo cuando el cronómetro se detiene
+bool cronometroActivo = false; // Estado del cronómetro (activo o detenido)
+
+// Pines de los LEDs
+int ledCronometro = 4;  // LED que indica el estado del cronómetro (activo o detenido)
+int ledReinicio = 5;    // LED que indica cuando el cronómetro es reiniciado
+
+void setup() {
+  Serial.begin(9600);  // Inicia la comunicación serial a 9600 baudios
+  
+  // Configura los pines de los botones
+  pinMode(2, INPUT_PULLUP);  // Botón 1 (Iniciar/Reanudar)
+  pinMode(3, INPUT_PULLUP);  // Botón 2 (Reiniciar)
+  
+  // Configura los pines de los LEDs
+  pinMode(ledCronometro, OUTPUT);
+  pinMode(ledReinicio, OUTPUT);
+  
+  // Apaga los LEDs al inicio
+  digitalWrite(ledCronometro, LOW);
+  digitalWrite(ledReinicio, LOW);
+  
+  Serial.println("Cronometro iniciado.");
+  Serial.println("Presiona el boton 1 para iniciar o reanudar y el boton 2 para reiniciar el cronometro.");
+}
+
+void loop() {
+  delay(10);
+  // Si el botón 1 es presionado (iniciar o reanudar el cronómetro)
+  if (digitalRead(2) == LOW) {
+    if (!cronometroActivo) {
+      // Si el cronómetro no está activo, lo iniciamos
+      tiempoInicio = millis() - tiempoDetenido;  // Reanudamos desde el tiempo detenido
+      cronometroActivo = true;
+      Serial.println("Cronometro iniciado.");
+      
+      // Encendemos el LED que indica que el cronómetro está activo
+      digitalWrite(ledCronometro, HIGH);
+      digitalWrite(ledReinicio, LOW);
+    }
+    delay(300);  // Para evitar rebotes en el botón
+  }
+
+  // Si el botón 2 es presionado (reiniciar el cronómetro)
+  if (digitalRead(3) == LOW) {
+    cronometroActivo = false;  // Detenemos el cronómetro
+    tiempoDetenido = 0;        // Reiniciamos el tiempo detenido
+    Serial.println("Cronometro reiniciado.");
+    
+    // Apagamos el LED del cronómetro
+    digitalWrite(ledCronometro, LOW);
+    
+    // Encendemos el LED de reinicio para indicar que el cronómetro fue reiniciado
+    digitalWrite(ledReinicio, HIGH);
+    delay(300);  // Para evitar rebotes en el botón
+  }
+
+  if (cronometroActivo) {
+    // Si el cronómetro está activo, mostramos el tiempo transcurrido
+    unsigned long tiempoTranscurrido = millis() - tiempoInicio;
+    unsigned long segundos = tiempoTranscurrido / 1000;
+    unsigned long minutos = segundos / 60;
+    segundos = segundos % 60;
+    unsigned long horas = minutos / 60;
+    minutos = minutos % 60;
+
+    Serial.print("Tiempo transcurrido: ");
+    if (horas < 10) Serial.print("0");
+    Serial.print(horas);
+    Serial.print(":");
+    if (minutos < 10) Serial.print("0");
+    Serial.print(minutos);
+    Serial.print(":");
+    if (segundos < 10) Serial.print("0");
+    Serial.print(segundos);
+    Serial.println("");
+
+    delay(1000);  // Actualizamos el tiempo cada segundo
+  }
+}
