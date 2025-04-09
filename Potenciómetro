@@ -1,0 +1,37 @@
+// C++ code
+//
+int pinsPWM[] = {3, 6, 9, 10};  // Declaramos los 4 pines PWM
+int pinPot = 0;  // Pin para el potenciómetro
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Configuramos los pines PWM como salida
+  for (int i = 0; i < 4; i++) {
+    pinMode(pinsPWM[i], OUTPUT);
+  }
+}
+
+void loop() {
+  int valor = analogRead(pinPot);  // Leemos el valor del potenciómetro
+  
+  // Normalizamos el valor leído del potenciómetro (0 a 1023) a un rango de 0 a 255
+  int valorPWM = map(valor, 0, 1023, 0, 4);  // Mapeamos a un rango de 0 a 4 para 4 LEDs
+
+  // Encender los LEDs progresivamente
+  for (int i = 0; i < 4; i++) {
+    if (i < valorPWM) {
+      analogWrite(pinsPWM[i], 255);  // Enciende el LED a máxima intensidad
+    } else {
+      analogWrite(pinsPWM[i], 0);    // Apaga el LED
+    }
+  }
+  
+  // Muestra el valor leído en el monitor serial
+  Serial.print("Valor Potenciómetro: ");
+  Serial.println(valor);
+  
+  // Pausa pequeña antes de repetir el ciclo
+  delay(100);  // Hacemos una pausa pequeña para evitar lecturas demasiado rápidas
+}
+
